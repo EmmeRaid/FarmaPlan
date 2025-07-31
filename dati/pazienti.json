@@ -4,7 +4,15 @@
     "cognome": "Rossi",
     "cf": "RSSMRA80A01H501U",
     "data_nascita": "1980-01-15",
-    "piani": [],
+    "piani": [
+      {
+        "nome_farmaco": "Boro",
+        "dosaggio": "23",
+        "data_inizio": "2025-07-31",
+        "data_fine": "2025-07-31",
+        "motivazione_interruzione": ""
+      }
+    ],
     "deceduto": false
   },
   {
@@ -16,7 +24,7 @@
       {
         "data_fine": "2024-06-01",
         "data_inizio": "2024-01-01",
-        "dosaggio": "100",
+        "dosaggio": "30",
         "motivazione_interruzione": "",
         "nome_farmaco": "Aspirina"
       },

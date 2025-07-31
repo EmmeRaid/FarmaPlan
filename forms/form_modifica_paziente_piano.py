@@ -3,13 +3,20 @@ from tkinter import StringVar, Menu
 from datetime import datetime
 import requests
 import configparser
-from dati.gestore_dati import salva_pazienti
+import logging
+import os
+from dati.gestore_dati import salva_pazienti, get_auth_headers, get_server_config
 from tkinter import messagebox
 from widgets.popup_alert import popup_dark
+
+# Logger per il form modifica paziente e piano
+logger = logging.getLogger('FarmaPlan.FormModificaPazientePiano')
 
 class FormModificaPazientePiano(ctk.CTkFrame):
     def __init__(self, master):
         super().__init__(master)
+        logger.info("Inizializzazione FormModificaPazientePiano")
+        
         self.config_server()
         self.pazienti = self.carica_dati_dal_server()
 
@@ -61,20 +68,32 @@ class FormModificaPazientePiano(ctk.CTkFrame):
         self._setup_autocompletamento()
 
     def config_server(self):
-        config = configparser.ConfigParser()
-        config.read("config.ini")
-        self.host = config.get("server", "host", fallback="localhost")
-        self.port = config.get("server", "port", fallback="5000")
-        self.base_url = f"http://{self.host}:{self.port}"
+        """Configura la connessione al server"""
+        self.base_url = get_server_config()
+        logger.info(f"Configurazione server: {self.base_url}")
+
+    def get_auth_headers(self):
+        """Restituisce gli header di autenticazione per le richieste al server"""
+        return get_auth_headers()
 
     def carica_dati_dal_server(self):
+        """Carica i dati dei pazienti dal server con autenticazione"""
+        logger.info("Caricamento pazienti dal server")
         try:
             url = f"{self.base_url}/pazienti"
-            response = requests.get(url, timeout=5)
+            headers = self.get_auth_headers()
+            response = requests.get(url, headers=headers, timeout=5)
             response.raise_for_status()
-            return response.json()
+            data = response.json()
+            logger.info(f"Caricati {len(data)} pazienti dal server")
+            return data
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Errore richiesta server: {e}")
+            popup_dark("Errore", f"Errore di connessione al server: {e}")
+            return []
         except Exception as e:
-            print(f"Errore caricamento pazienti dal server: {e}")
+            logger.error(f"Errore caricamento pazienti dal server: {e}")
+            popup_dark("Errore", f"Errore nel caricamento dati: {e}")
             return []
 
     def _crea_entry(self, label, row):
@@ -85,23 +104,30 @@ class FormModificaPazientePiano(ctk.CTkFrame):
 
     def toggle_motivazione_entry(self):
         if self.var_deceduto.get():
+            logger.debug("Checkbox deceduto attivato")
             self.entry_motivazione.configure(state="normal")
             self.entry_motivazione.delete(0, 'end')
             self.entry_motivazione.insert(0, "Deceduto")
         else:
+            logger.debug("Checkbox deceduto disattivato")
             self.entry_motivazione.configure(state="normal")
             self.entry_motivazione.delete(0, 'end')
 
     def carica_paziente(self, valore):
+        """Carica i dati del paziente selezionato"""
+        logger.debug(f"Caricamento paziente: {valore}")
         for idx, paz in enumerate(self.pazienti):
             nome_cogn = f"{paz['nome']} {paz['cognome']}"
             if nome_cogn == valore:
                 self.selected_paziente_index = idx
+                logger.info(f"Paziente selezionato: {valore} (index: {idx})")
                 self._popola_form_paziente(paz)
                 self._aggiorna_combo_piani(paz)
                 break
 
     def _popola_form_paziente(self, paziente):
+        """Popola il form con i dati del paziente"""
+        logger.debug(f"Popolamento form paziente: CF {paziente.get('cf', 'N/A')}")
         self.entry_nome.delete(0, 'end')
         self.entry_nome.insert(0, paziente["nome"])
         self.entry_cognome.delete(0, 'end')
@@ -115,7 +141,9 @@ class FormModificaPazientePiano(ctk.CTkFrame):
         self.toggle_motivazione_entry()
 
     def _aggiorna_combo_piani(self, paziente):
+        """Aggiorna la combobox dei piani terapeutici"""
         piani = paziente.get("piani", [])
+        logger.debug(f"Aggiornamento combo piani: {len(piani)} piani trovati")
         self.combo_piani.configure(values=[p["nome_farmaco"] for p in piani])
         if piani:
             self.combo_piani.set(self.combo_piani.values[0])
@@ -125,17 +153,23 @@ class FormModificaPazientePiano(ctk.CTkFrame):
             self.pulisci_form_piano()
 
     def carica_piano(self, valore):
+        """Carica i dati del piano terapeutico selezionato"""
         if self.selected_paziente_index is None:
             return
+        
+        logger.debug(f"Caricamento piano: {valore}")
         paziente = self.pazienti[self.selected_paziente_index]
         piani = paziente.get("piani", [])
         for idx, piano in enumerate(piani):
             if piano["nome_farmaco"] == valore:
                 self.selected_piano_index = idx
+                logger.info(f"Piano selezionato: {valore} (index: {idx})")
                 self._popola_form_piano(piano)
                 break
 
     def _popola_form_piano(self, piano):
+        """Popola il form con i dati del piano terapeutico"""
+        logger.debug(f"Popolamento form piano: {piano.get('nome_farmaco', 'N/A')}")
         self.entry_nome_farmaco.delete(0, 'end')
         self.entry_nome_farmaco.insert(0, piano["nome_farmaco"])
         self.entry_dosaggio.delete(0, 'end')
@@ -148,10 +182,14 @@ class FormModificaPazientePiano(ctk.CTkFrame):
         self.entry_motivazione.insert(0, piano.get("motivazione_interruzione", ""))
 
     def pulisci_form_piano(self):
+        """Pulisce i campi del piano terapeutico"""
+        logger.debug("Pulizia form piano")
         for entry in [self.entry_nome_farmaco, self.entry_dosaggio, self.entry_data_inizio, self.entry_data_fine, self.entry_motivazione]:
             entry.delete(0, 'end')
 
     def clear_all(self):
+        """Pulisce tutti i campi del form"""
+        logger.info("Reset completo del form")
         self.selected_paziente_index = None
         self.selected_piano_index = None
         self.combo_pazienti.set("")
@@ -162,52 +200,76 @@ class FormModificaPazientePiano(ctk.CTkFrame):
         self.var_deceduto.set(False)
 
     def salva_modifiche(self):
+        """Salva le modifiche al paziente e al piano terapeutico"""
         if self.selected_paziente_index is None:
+            logger.warning("Tentativo salvataggio senza paziente selezionato")
             popup_dark("Errore", "Nessun paziente selezionato!")
-            print("Nessun paziente selezionato")
             return
 
         paziente = self.pazienti[self.selected_paziente_index]
-        paziente["nome"] = self.entry_nome.get()
-        paziente["cognome"] = self.entry_cognome.get()
-        paziente["cf"] = self.entry_cf.get()
-        paziente["data_nascita"] = self.entry_data_nascita.get()
+        cf_originale = paziente["cf"]
+        
+        logger.info(f"Salvataggio modifiche paziente: CF {cf_originale}")
+
+        # Aggiorna dati paziente
+        paziente["nome"] = self.entry_nome.get().strip()
+        paziente["cognome"] = self.entry_cognome.get().strip()
+        paziente["cf"] = self.entry_cf.get().strip()
+        paziente["data_nascita"] = self.entry_data_nascita.get().strip()
         paziente["deceduto"] = self.var_deceduto.get()
 
+        # Aggiorna piano se selezionato
         if self.selected_piano_index is not None:
+            logger.info(f"Aggiornamento piano terapeutico (index: {self.selected_piano_index})")
             piano = paziente["piani"][self.selected_piano_index]
-            piano["nome_farmaco"] = self.entry_nome_farmaco.get()
-            piano["dosaggio"] = self.entry_dosaggio.get()
-            piano["data_inizio"] = self.entry_data_inizio.get()
-            piano["data_fine"] = self.entry_data_fine.get()
+            piano["nome_farmaco"] = self.entry_nome_farmaco.get().strip()
+            piano["dosaggio"] = self.entry_dosaggio.get().strip()
+            piano["data_inizio"] = self.entry_data_inizio.get().strip()
+            piano["data_fine"] = self.entry_data_fine.get().strip()
             piano["motivazione_interruzione"] = self.entry_motivazione.get().strip()
 
-        salva_pazienti(self.pazienti)
-
+        # Salva locale
         try:
-            cf = paziente["cf"]
-            url = f"{self.base_url}/pazienti/{cf}"
-            response = requests.put(url, json=paziente, timeout=5)
-            response.raise_for_status()
+            salva_pazienti(self.pazienti)
+            logger.info("Dati salvati localmente")
         except Exception as e:
-            print(f"Errore durante aggiornamento server: {e}")
+            logger.error(f"Errore salvataggio locale: {e}")
 
+        # Sincronizza con server
         try:
+            url = f"{self.base_url}/pazienti/{cf_originale}"
+            headers = self.get_auth_headers()
+            response = requests.put(url, json=paziente, headers=headers, timeout=5)
+            response.raise_for_status()
+            logger.info("Sincronizzazione server completata")
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Errore richiesta server durante aggiornamento: {e}")
+            popup_dark("Errore", f"Errore di connessione al server: {e}")
+            return
+        except Exception as e:
+            logger.error(f"Errore durante aggiornamento server: {e}")
+            popup_dark("Errore", f"Errore nell'aggiornamento: {e}")
+            return
+
+        # Ricarica dati aggiornati
+        try:
+            logger.info("Ricaricamento dati aggiornati dal server")
             self.pazienti = self.carica_dati_dal_server()
             self.combo_pazienti.configure(values=[f"{p['nome']} {p['cognome']}" for p in self.pazienti])
+            logger.info("Dati ricaricati con successo")
         except Exception as e:
-            print(f"Errore nel caricamento dati aggiornati: {e}")
+            logger.error(f"Errore nel ricaricamento dati aggiornati: {e}")
 
-        messagebox.showinfo("Successo", "Paziente Modificato con successo!")
-        print("Modifiche salvate e sincronizzate.")
+        popup_dark("Successo", "Paziente modificato con successo!")
+        logger.info("Modifiche salvate e sincronizzate con successo")
 
     def _setup_autocompletamento(self):
+        """Configura l'autocompletamento per i campi"""
+        logger.debug("Configurazione autocompletamento")
         # Associa autocompletamento ai singoli entry
         self._associa_autocomplete(self.entry_nome, "nome")
         self._associa_autocomplete(self.entry_cognome, "cognome")
         self._associa_autocomplete(self.entry_cf, "cf")
-        # Non attivo autocompletamento su data_nascita e motivazione per evitare problemi
-        # Se vuoi attivare, crea logica simile e lista filtrata coerente
         self._associa_autocomplete(self.entry_nome_farmaco, "nome_farmaco")
         self._associa_autocomplete(self.entry_dosaggio, "dosaggio")
         self._associa_autocomplete(self.entry_data_inizio, "data_inizio")

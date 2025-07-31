@@ -4,6 +4,7 @@ from tkcalendar import DateEntry
 from datetime import datetime
 import requests
 import configparser
+import os
 
 
 class PaginaStampaPazienti(ctk.CTkFrame):
@@ -17,7 +18,6 @@ class PaginaStampaPazienti(ctk.CTkFrame):
         verde_chiaro = "#b5f7c9"   # selezione
         verde_hover = "#84e4a2"    # hover
         bianco = "#ffffff"
-        grigino = "#f2f2f2"
         nero = "#000000"
         bordo = "#cccccc"
 
@@ -101,15 +101,23 @@ class PaginaStampaPazienti(ctk.CTkFrame):
         self.port = config.get("server", "port", fallback="5000")
         self.base_url = f"http://{self.host}:{self.port}"
 
+    def get_auth_headers(self):
+        """Restituisce gli header di autenticazione per le richieste al server"""
+        password = os.environ.get('SERVER_PASSWORD')
+        if password:
+            return {"Authorization": f"Bearer {password}"}
+        return {}
+
     def carica_dati_dal_server(self):
         try:
             url = f"{self.base_url}/pazienti"
-            response = requests.get(url)
-            if response.status_code == 200:
-                return response.json()
-            else:
-                print(f"Errore caricamento pazienti: {response.status_code}")
-                return []
+            headers = self.get_auth_headers()
+            response = requests.get(url, headers=headers, timeout=5)
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            print(f"Errore richiesta server: {e}")
+            return []
         except Exception as e:
             print(f"Errore connessione server: {e}")
             return []
@@ -167,12 +175,7 @@ class PaginaStampaPazienti(ctk.CTkFrame):
                     tags=(tag,)
                 )
                 
-        
-        # Configura tag per righe alternate
-        self.tree_pazienti.tag_configure("evenrow", background=bianco)
-        self.tree_pazienti.tag_configure("oddrow", background=grigino)
         self.tree_pazienti.tag_configure("deceduto", background="red", foreground="white")
-
                 
         self.tree_piani.tag_configure("interrotto", background="#FF9999")
         self.tree_piani.tag_configure("attivo", background="white")
