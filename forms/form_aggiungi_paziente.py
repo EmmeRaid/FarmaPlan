@@ -3,6 +3,8 @@ from tkcalendar import DateEntry
 from datetime import date, timedelta
 import requests
 import configparser
+from widgets.popup_alert import popup_dark
+
 
 class FormAggiungiPaziente(ctk.CTkFrame):
     def __init__(self, master, callback_codice_fiscale_esistente):
@@ -10,8 +12,10 @@ class FormAggiungiPaziente(ctk.CTkFrame):
         self.callback_codice_fiscale_esistente = callback_codice_fiscale_esistente
 
         self.config_server()
-
         self.grid_columnconfigure(1, weight=1)
+        
+
+        
 
         ctk.CTkLabel(self, text="Aggiungi Paziente", font=("Arial", 18)).grid(row=0, column=0, columnspan=2, pady=10)
 
@@ -64,7 +68,7 @@ class FormAggiungiPaziente(ctk.CTkFrame):
                 self.callback_codice_fiscale_esistente(cf)
                 break
 
-    def salva_paziente(self):
+    def salva_paziente(self, event = None):
         pazienti = self.carica_pazienti()  # Dati freschi dal server
 
         nome = self.entry_nome.get().strip()
@@ -73,7 +77,7 @@ class FormAggiungiPaziente(ctk.CTkFrame):
         data_nascita = self.data_nascita_picker.get_date().strftime("%Y-%m-%d")
 
         if not nome or not cognome or not cf or not data_nascita:
-            ctk.CTkMessageBox(title="Errore", message="Compila tutti i campi!").show()
+            popup_dark("Errore", "Compila tutti i campi!")
             return
 
         for paz in pazienti:
@@ -95,10 +99,10 @@ class FormAggiungiPaziente(ctk.CTkFrame):
             response = requests.post(url, json=nuovo_paziente, timeout=5)
             response.raise_for_status()
         except Exception as e:
-            ctk.CTkMessageBox(title="Errore", message=f"Errore durante salvataggio paziente: {e}").show()
+            popup_dark("Errore", message=f"Errore durante salvataggio paziente: {e}")
             return
 
-        ctk.CTkMessageBox(title="Successo", message="Paziente aggiunto!").show()
+        popup_dark("Successo", "Paziente aggiunto!")
 
         self.entry_nome.delete(0, "end")
         self.entry_cognome.delete(0, "end")

@@ -37,11 +37,11 @@
     "data_nascita": "1970-03-20",
     "piani": [
       {
-        "nome_farmaco": "Ibuprofene",
-        "dosaggio": "200",
-        "data_inizio": "2023-09-15",
         "data_fine": "2024-03-15",
-        "motivazione_interruzione": "Terapia completata"
+        "data_inizio": "2023-09-15",
+        "dosaggio": "200",
+        "motivazione_interruzione": "Terapia completata",
+        "nome_farmaco": "Ibuprofene"
       }
     ],
     "deceduto": false
@@ -89,6 +89,34 @@
         "dosaggio": "24",
         "motivazione_interruzione": "Deceduto",
         "nome_farmaco": "Borocillina"
+      },
+      {
+        "data_fine": "2025-07-31",
+        "data_inizio": "2025-07-31",
+        "dosaggio": "23",
+        "motivazione_interruzione": "Deceduto",
+        "nome_farmaco": "Boto"
+      },
+      {
+        "data_fine": "2025-07-31",
+        "data_inizio": "2025-07-31",
+        "dosaggio": "23",
+        "motivazione_interruzione": "",
+        "nome_farmaco": "ASD"
+      },
+      {
+        "data_fine": "2025-07-31",
+        "data_inizio": "2025-07-31",
+        "dosaggio": "23",
+        "motivazione_interruzione": "",
+        "nome_farmaco": "BORO"
+      },
+      {
+        "data_fine": "2025-07-31",
+        "data_inizio": "2025-07-31",
+        "dosaggio": "23",
+        "motivazione_interruzione": "",
+        "nome_farmaco": "ASDASD"
       }
     ],
     "deceduto": true

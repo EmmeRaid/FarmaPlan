@@ -10,8 +10,16 @@ class SliderMenu(ctk.CTk):
     def __init__(self):
         super().__init__()
         self.title("PlanLog")
+        self.iconbitmap("Logo.ico")  # solo .ico su Windows
         self.geometry("900x600")
         self.resizable(False, False)
+        # Key bindings
+        self.bind("<F1>", lambda event: self.mostra_aggiungi())
+        self.bind("<F2>", lambda event: self.mostra_modifica())
+        self.bind("<F3>", lambda event: self.mostra_stampa())
+        self.bind("<Escape>", self.conferma_uscita)
+
+
 
         self.grid_columnconfigure(1, weight=1)
         self.grid_rowconfigure(0, weight=1)
@@ -31,6 +39,9 @@ class SliderMenu(ctk.CTk):
 
         self.btn_stampa = ctk.CTkButton(self.menu_frame, text="Stampa Pazienti", command=self.mostra_stampa)
         self.btn_stampa.pack(pady=10, padx=20)
+        
+        self.btn_escape = ctk.CTkButton(self.menu_frame, text="Esci", command=self.conferma_uscita, hover_color="red")
+        self.btn_escape.pack(pady=10, padx=20)
 
         self.content_frame = ctk.CTkFrame(self)
         self.content_frame.grid(row=0, column=1, sticky="nsew")
@@ -38,6 +49,25 @@ class SliderMenu(ctk.CTk):
         self.agg_form_switcher = None
         self.form_modifica = None
         self.pagina_stampa = None
+        
+    def conferma_uscita(self, event = None):
+        finestra = ctk.CTkToplevel(self)
+        finestra.title("Conferma Uscita")
+        finestra.iconbitmap("Logo.ico") 
+        finestra.geometry("300x120")
+        finestra.grab_set() #Blocca interazione con finestra principale
+        
+        label = ctk.CTkLabel(finestra, text="Vuoi davvero uscire?")
+        label.pack(pady= 15)
+        
+        pulsanti_frame= ctk.CTkFrame(finestra, fg_color= "transparent")
+        pulsanti_frame.pack(pady=15)
+        
+        btn_si = ctk.CTkButton(pulsanti_frame, text="Sì", width=80, hover_color="red",command=self.destroy)
+        btn_si.grid(row=0, column=0, padx=10)
+
+        btn_no = ctk.CTkButton(pulsanti_frame, text="No", width=80, command=finestra.destroy)
+        btn_no.grid(row=0, column=1, padx=10)
 
     def svuota_contenuto(self):
         for widget in self.content_frame.winfo_children():

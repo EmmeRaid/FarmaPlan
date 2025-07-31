@@ -3,6 +3,9 @@ from tkcalendar import DateEntry
 from datetime import date, timedelta
 import requests
 import configparser
+from tkinter import messagebox
+from widgets.popup_alert import popup_dark
+
 
 class FormAggiungiPiano(ctk.CTkFrame):
     def __init__(self, master):
@@ -28,16 +31,16 @@ class FormAggiungiPiano(ctk.CTkFrame):
 
         ctk.CTkLabel(self, text="Data Inizio:").grid(row=4, column=0, sticky="e", padx=5, pady=5)
         oggi = date.today()
-        fra_due_anni = oggi.replace(year=oggi.year + 2)
+        Max_date = oggi.replace(year=oggi.year + 10)
         self.data_inizio_picker = DateEntry(self, date_pattern="yyyy-MM-dd", state="readonly",
                                             mindate=oggi - timedelta(days=365*10),
-                                            maxdate=fra_due_anni)
+                                            maxdate=Max_date)
         self.data_inizio_picker.grid(row=4, column=1, sticky="ew", padx=5, pady=5)
 
         ctk.CTkLabel(self, text="Data Fine:").grid(row=5, column=0, sticky="e", padx=5, pady=5)
         self.data_fine_picker = DateEntry(self, date_pattern="yyyy-MM-dd", state="readonly",
                                           mindate=oggi,
-                                          maxdate=fra_due_anni)
+                                          maxdate=Max_date)
         self.data_fine_picker.grid(row=5, column=1, sticky="ew", padx=5, pady=5)
 
         self.btn_salva = ctk.CTkButton(self, text="Salva Piano", command=self.salva_piano)
@@ -70,11 +73,11 @@ class FormAggiungiPiano(ctk.CTkFrame):
         data_fine = self.data_fine_picker.get_date()
 
         if not cf_paziente or not farmaco or not dosaggio or not data_inizio or not data_fine:
-            ctk.CTkMessageBox(title="Errore", message="Compila tutti i campi!").show()
+            popup_dark("Errore", "Compila tutti i campi!")
             return
 
         if data_fine < data_inizio:
-            ctk.CTkMessageBox(title="Errore", message="La data di fine non può essere precedente alla data di inizio!").show()
+            popup_dark("Errore", "La data di fine non può essere precedente alla data di inizio!")
             return
 
         paziente = None
@@ -84,7 +87,7 @@ class FormAggiungiPiano(ctk.CTkFrame):
                 break
 
         if not paziente:
-            ctk.CTkMessageBox(title="Errore", message="Codice Fiscale paziente non trovato!").show()
+            popup_dark("Errore", "Codice Fiscale paziente non trovato!")
             return
 
         nuovo_piano = {
@@ -103,10 +106,10 @@ class FormAggiungiPiano(ctk.CTkFrame):
             response = requests.put(url, json=paziente, timeout=5)
             response.raise_for_status()
         except Exception as e:
-            ctk.CTkMessageBox(title="Errore", message=f"Errore durante aggiornamento server: {e}").show()
+            popup_dark("Errore", message=f"Errore durante aggiornamento server: {e}")
             return
 
-        ctk.CTkMessageBox(title="Successo", message="Piano aggiunto!").show()
+        popup_dark("Successo", "Piano aggiunto!")
 
         # Pulizia form
         self.entry_cf_paziente.delete(0, "end")

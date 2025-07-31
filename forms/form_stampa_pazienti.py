@@ -10,6 +10,41 @@ class PaginaStampaPazienti(ctk.CTkFrame):
     def __init__(self, master):
         super().__init__(master)
 
+        style = ttk.Style()
+        style.theme_use("clam")  # stile base con personalizzazioni supportate
+
+        # Colori personalizzati
+        verde_chiaro = "#b5f7c9"   # selezione
+        verde_hover = "#84e4a2"    # hover
+        bianco = "#ffffff"
+        grigino = "#f2f2f2"
+        nero = "#000000"
+        bordo = "#cccccc"
+
+        # Layout senza bordi esterni
+        style.layout("Treeview", [('Treeview.treearea', {'sticky': 'nswe'})])
+
+        # Impostazioni generali tabella
+        style.configure("Treeview",
+                        background=bianco,
+                        foreground=nero,
+                        fieldbackground=bianco,
+                        rowheight=24,
+                        bordercolor=bordo,
+                        borderwidth=1,
+                        relief="flat")
+
+        # Colore selezione e hover
+        style.map("Treeview",
+                  background=[
+                      ("selected", verde_chiaro),
+                      ("active", verde_hover)
+                  ],
+                  foreground=[
+                      ("selected", nero),
+                      ("active", nero)
+                  ])
+
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
 
@@ -52,8 +87,8 @@ class PaginaStampaPazienti(ctk.CTkFrame):
         self.tree_piani.heading("motivazione", text="Motivazione Interruzione")
         self.tree_piani.column("farmaco", width=200)
         self.tree_piani.column("dosaggio", width=100)
-        self.tree_piani.column("inizio", width=120)
-        self.tree_piani.column("fine", width=120)
+        self.tree_piani.column("inizio", width=80)
+        self.tree_piani.column("fine", width=80)
         self.tree_piani.column("motivazione", width=250)
         self.tree_piani.pack(fill="both", expand=True, padx=10, pady=10)
 
@@ -131,7 +166,14 @@ class PaginaStampaPazienti(ctk.CTkFrame):
                     ),
                     tags=(tag,)
                 )
+                
+        
+        # Configura tag per righe alternate
+        self.tree_pazienti.tag_configure("evenrow", background=bianco)
+        self.tree_pazienti.tag_configure("oddrow", background=grigino)
+        self.tree_pazienti.tag_configure("deceduto", background="red", foreground="white")
 
+                
         self.tree_piani.tag_configure("interrotto", background="#FF9999")
         self.tree_piani.tag_configure("attivo", background="white")
         self.tabview.set("Piani Terapeutici")
