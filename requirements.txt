@@ -1,0 +1,5 @@
+requests
+tkcalendar
+python-dateutil
+Pillow
+pyperclip

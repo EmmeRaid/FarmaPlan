@@ -1,0 +1,112 @@
+[
+  {
+    "nome": "Mario",
+    "cognome": "Rossi",
+    "cf": "RSSMRA80A01H501U",
+    "data_nascita": "1980-01-15",
+    "piani": [],
+    "deceduto": false
+  },
+  {
+    "nome": "Lucia",
+    "cognome": "Bianchi",
+    "cf": "BNCLCU85B03F205Z",
+    "data_nascita": "1985-02-10",
+    "piani": [
+      {
+        "data_fine": "2024-06-01",
+        "data_inizio": "2024-01-01",
+        "dosaggio": "100",
+        "motivazione_interruzione": "",
+        "nome_farmaco": "Aspirina"
+      },
+      {
+        "data_fine": "2025-12-31",
+        "data_inizio": "2025-01-01",
+        "dosaggio": "500",
+        "motivazione_interruzione": "Allergia",
+        "nome_farmaco": "Paracetamolo"
+      }
+    ],
+    "deceduto": false
+  },
+  {
+    "nome": "Giuseppe",
+    "cognome": "Verdi",
+    "cf": "VRDGPP70C15H501T",
+    "data_nascita": "1970-03-20",
+    "piani": [
+      {
+        "nome_farmaco": "Ibuprofene",
+        "dosaggio": "200",
+        "data_inizio": "2023-09-15",
+        "data_fine": "2024-03-15",
+        "motivazione_interruzione": "Terapia completata"
+      }
+    ],
+    "deceduto": false
+  },
+  {
+    "nome": "Anna",
+    "cognome": "Neri",
+    "cf": "NRANNA90D45L219P",
+    "data_nascita": "1990-04-05",
+    "piani": [],
+    "deceduto": false
+  },
+  {
+    "nome": "Paolo",
+    "cognome": "Mancini",
+    "cf": "MNCPLO75E12F205H",
+    "data_nascita": "1975-05-12",
+    "piani": [
+      {
+        "nome_farmaco": "Metformina",
+        "dosaggio": "850",
+        "data_inizio": "2022-10-01",
+        "data_fine": "2025-10-01",
+        "motivazione_interruzione": "Deceduto"
+      },
+      {
+        "nome_farmaco": "Lisinopril",
+        "dosaggio": "10",
+        "data_inizio": "2023-01-01",
+        "data_fine": "2023-12-31",
+        "motivazione_interruzione": "Effetti collaterali"
+      }
+    ],
+    "deceduto": true
+  },
+  {
+    "nome": "Matteo",
+    "cognome": "Bello",
+    "cf": "BLLMTT99L13L419O",
+    "data_nascita": "1999-07-13",
+    "piani": [
+      {
+        "data_fine": "2026-07-10",
+        "data_inizio": "2025-07-10",
+        "dosaggio": "24",
+        "motivazione_interruzione": "Deceduto",
+        "nome_farmaco": "Borocillina"
+      }
+    ],
+    "deceduto": true
+  },
+  {
+    "nome": "Francesco",
+    "cognome": "Pepe",
+    "cf": "FRSLKZ99LSAK08",
+    "data_nascita": "1997-02-20",
+    "piani": [
+      {
+        "nome_farmaco": "Borocellina",
+        "dosaggio": "23",
+        "data_inizio": "2025-07-30",
+        "data_fine": "2027-07-22",
+        "motivazione_interruzione": ""
+      }
+    ],
+    "deceduto": false
+  }
+]
